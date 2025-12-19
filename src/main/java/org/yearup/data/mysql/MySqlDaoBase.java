@@ -6,15 +6,13 @@ import java.sql.SQLException;
 
 public abstract class MySqlDaoBase
 {
-    private DataSource dataSource;
+    protected DataSource ds;
 
-    public MySqlDaoBase(DataSource dataSource)
-    {
-        this.dataSource = dataSource;
+    public MySqlDaoBase(DataSource ds) {
+        this.ds = ds;
     }
-
     protected Connection getConnection() throws SQLException
     {
-        return dataSource.getConnection();
+            return ds.getConnection();
+        }
     }
-}
