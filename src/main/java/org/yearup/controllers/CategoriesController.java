@@ -44,7 +44,7 @@ public class CategoriesController
 
     // the url to return all products in category 1 would look like this
     // https://localhost:8080/categories/1/products
-    @GetMapping("{categoryId}/products")
+    @GetMapping("{id}/products")
     public List<Product> getProductsById(@PathVariable int categoryId)
     {
         // get a list of product by categoryId
@@ -61,7 +61,7 @@ public class CategoriesController
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
-    @PutMapping("")
+    @PutMapping("{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
 
     public void updateCategory(@PathVariable int id, @RequestBody Category category)
@@ -73,7 +73,7 @@ public class CategoriesController
 
     // add annotation to call this method for a DELETE action - the url path must include the categoryId
     // add annotation to ensure that only an ADMIN can call this function
-
+    @DeleteMapping("{id}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void deleteCategory(@PathVariable int id)
     {
