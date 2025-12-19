@@ -7,6 +7,12 @@ import java.util.Map;
 public class ShoppingCart
 {
     private Map<Integer, ShoppingCartItem> items = new HashMap<>();
+    public ShoppingCart() {}
+
+    public ShoppingCart(Map<Integer, ShoppingCartItem> items) {
+        this.items = items;
+    }
+
 
     public Map<Integer, ShoppingCartItem> getItems()
     {
