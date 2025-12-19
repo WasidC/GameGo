@@ -54,41 +54,41 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao {
 
     @Override
     public Category getById(int categoryId) {
-    {
-        // get category by id
-        return null;
-    }
+        {
 
-        public Category create(Category category) {
             Category cat = new Category();
 
-            try(Connection c = ds.getConnection();
-                PreparedStatement q = c.prepareStatement("""
-                SELECT 
-                    category_id, name, description
-                FROM 
-                    categories
-                WHERE 
-                    category_id = ?
-                """)){
-                q.setInt(1,category.getCategoryId());
+            try (Connection c = ds.getConnection();
+                 PreparedStatement q = c.prepareStatement("""
+                         SELECT 
+                             category_id, name, description
+                         FROM 
+                             categories
+                         WHERE 
+                             category_id = ?
+                         """)) {
+                q.setInt(1, categoryId);
 
                 ResultSet r = q.executeQuery();
 
-                if(r.next()){
+                if (r.next()) {
                     cat.setCategoryId(r.getInt("Category_id"));
                     cat.setName(r.getString("Name"));
                     cat.setDescription(r.getString("Description"));
-                }else{
+                } else {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND);
                 }
-            }catch(SQLException e){
-                System.out.println("Error getting category with id: " + category.getCategoryId());
+            } catch (SQLException e) {
+                System.out.println("Error getting category with id: " + categoryId);
             }
             return cat;
-
         }
 
+        @Override
+        public Category create (Category category){
+        }
+
+    }
         @Override
         public void update(int categoryId, Category category)
         {
