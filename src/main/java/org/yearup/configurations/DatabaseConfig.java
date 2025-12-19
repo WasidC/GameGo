@@ -8,12 +8,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class DatabaseConfig {
-{
     private BasicDataSource basicDataSource;
 
     @Bean
     public BasicDataSource dataSource() {
-    {
         return basicDataSource;
     }
 
@@ -28,5 +26,6 @@ public class DatabaseConfig {
             basicDataSource.setUsername(userName);
             basicDataSource.setPassword(password);
         }
+
     }
 }
