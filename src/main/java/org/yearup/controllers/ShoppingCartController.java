@@ -20,6 +20,7 @@ import java.security.Principal;
 // only logged in users should have access to these actions
 @PreAuthorize("hasAnyRole('USER','ADMIN')")
 @RequestMapping("/cart")
+@CrossOrigin
 public class ShoppingCartController
 {
     // a shopping cart requires
@@ -61,35 +62,38 @@ public class ShoppingCartController
     @PostMapping("/products/{id}")
     @ResponseStatus(value = HttpStatus.CREATED)
 
-    public void addToCart(Principal principal, @PathVariable int id){
+    public ShoppingCart addToCart(Principal principal, @PathVariable int id){
         String userName = principal.getName();
         User user = userDao.getByUserName(userName);
         int userId = user.getId();
 
         shoppingCartDao.addToCart(id, userId);
+        return shoppingCartDao.getByUserId(userId);
     }
 
     // add a PUT method to update an existing product in the cart - the url should be
     // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
     @PutMapping("/products/{id}")
-    public void updateQuantity(Principal principal, @PathVariable int id, @RequestBody ShoppingCartItem item){
+    public ShoppingCart updateQuantity(Principal principal, @PathVariable int id, @RequestBody ShoppingCartItem item){
         String userName = principal.getName();
         User user = userDao.getByUserName(userName);
         int userId = user.getId();
 
         shoppingCartDao.editCart(id, userId, item.getQuantity());
+        return shoppingCartDao.getByUserId(userId);
     }
 
 
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart
     @DeleteMapping("")
-    public void clearCart(Principal principal){
+    public ShoppingCart clearCart(Principal principal){
         String userName = principal.getName();
         User user = userDao.getByUserName(userName);
         int userID = user.getId();
 
         shoppingCartDao.clearCart(userID);
+        return new ShoppingCart();
     }
 }
