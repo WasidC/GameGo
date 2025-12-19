@@ -6,10 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.*;
-import org.yearup.models.Profile;
-import org.yearup.models.ShoppingCart;
-import org.yearup.models.ShoppingCartItem;
-import org.yearup.models.User;
+import org.yearup.models.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -23,31 +20,30 @@ import java.util.Map;
 @PreAuthorize("hasAnyRole('USER','ADMIN')")
 @RequestMapping("/cart")
 @CrossOrigin
-public class ShoppingCartController
-{
+public class ShoppingCartController {
     // a shopping cart requires
     private ShoppingCartDao shoppingCartDao;
     private UserDao userDao;
     private ProductDao productDao;
     private ProfileDao profileDao;
     private OrderDao orderDao;
+    private CheckoutService checkoutService;
 
     // constructor that injects the required DAO dependencies for the controller
     @Autowired
-    public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao, ProductDao productDao, ProfileDao profileDao, OrderDao orderDao) {
+    public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao, ProductDao productDao, ProfileDao profileDao, OrderDao orderDao,CheckoutService checkoutService) {
         this.shoppingCartDao = shoppingCartDao;
         this.userDao = userDao;
         this.productDao = productDao;
         this.profileDao = profileDao;
         this.orderDao = orderDao;
+        this.checkoutService = checkoutService;
     }
 
     @GetMapping("")
     // each method in this controller requires a Principal object as a parameter
-    public ShoppingCart getCart(Principal principal)
-    {
-        try
-        {
+    public ShoppingCart getCart(Principal principal) {
+        try {
             // get the currently logged in username
             String userName = principal.getName();
             // find database user by userId
@@ -56,9 +52,7 @@ public class ShoppingCartController
 
             // use the shoppingcartDao to get all items in the cart and return the cart
             return shoppingCartDao.getByUserId(userId);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad." + e);
         }
     }
@@ -68,7 +62,7 @@ public class ShoppingCartController
     @PostMapping("/products/{id}")
     @ResponseStatus(value = HttpStatus.CREATED)
 
-    public ShoppingCart addToCart(Principal principal, @PathVariable int id){
+    public ShoppingCart addToCart(Principal principal, @PathVariable int id) {
         String userName = principal.getName();
         User user = userDao.getByUserName(userName);
         int userId = user.getId();
@@ -81,7 +75,7 @@ public class ShoppingCartController
     // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
     @PutMapping("/products/{id}")
-    public ShoppingCart updateQuantity(Principal principal, @PathVariable int id, @RequestBody ShoppingCartItem item){
+    public ShoppingCart updateQuantity(Principal principal, @PathVariable int id, @RequestBody ShoppingCartItem item) {
         String userName = principal.getName();
         User user = userDao.getByUserName(userName);
         int userId = user.getId();
@@ -94,7 +88,7 @@ public class ShoppingCartController
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart
     @DeleteMapping("")
-    public ShoppingCart clearCart(Principal principal){
+    public ShoppingCart clearCart(Principal principal) {
         String userName = principal.getName();
         User user = userDao.getByUserName(userName);
         int userID = user.getId();
@@ -104,22 +98,16 @@ public class ShoppingCartController
     }
 
     @PostMapping("/checkout")
-    public Map<String, Object> checkout(Principal principal){
-        User user = userDao.getByUserName(principal.getName());
-        Profile profile = profileDao.getProfileByUserID(user.getId());
-        ShoppingCart cart = shoppingCartDao.getByUserId(user.getId());
+    public Map<String, Object> checkout(Principal principal) {
+        String userName = principal.getName();
+        User user = userDao.getByUserName(userName);
 
+        BigDecimal total = checkoutService.checkout(user.getId());
 
-        BigDecimal total = cart.getTotal();
+        Map<String, Object> output = new HashMap<>();
+        output.put("total", total);
 
-        orderDao.checkout(profile,cart);
-        shoppingCartDao.clearCart(user.getId());
-
-        Map<String, Object> receipt = new HashMap<>();
-        receipt.put("total", total);
-        receipt.put("message", "Checkout Successful!");
-
-        return receipt;
+        return output;
+        //return the receipt as API response
     }
-
 }
